@@ -8,8 +8,13 @@ import os
 import unittest
 from unittest.mock import MagicMock, patch
 
-# Mock CircuitPython modules before importing captive
-for mod in ("wifi", "socketpool", "microcontroller", "time"):
+# Mock CircuitPython / hardware modules before importing captive
+for mod in (
+    "board", "busio", "microcontroller", "time",
+    "digitalio",
+    "adafruit_esp32spi",
+    "adafruit_esp32spi.adafruit_esp32spi",
+):
     sys.modules.setdefault(mod, MagicMock())
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
