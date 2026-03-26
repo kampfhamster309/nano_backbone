@@ -5,7 +5,7 @@ OTA (over-the-air) firmware update system for the Arduino Nano RP2040 Connect.
 ## Components
 
 - **`server/`** — Django REST Framework update server
-- **`firmware/`** — CircuitPython firmware (Ticket 3+)
+- **`firmware/`** — CircuitPython firmware for the Arduino Nano RP2040 Connect
 
 ## Local development
 
@@ -48,9 +48,13 @@ Returns `{ "status": "ok" }`.
 
 ### Running tests
 
-Tests use an in-memory SQLite database and do not require Docker.
-
+**Server** (in-memory SQLite, no Docker required):
 ```bash
 cd server
-python manage.py test devices --settings=config.test_settings
+python manage.py test devices firmware --settings=config.test_settings
+```
+
+**Firmware** (host-runnable, no hardware required):
+```bash
+python3 -m unittest discover -s firmware/tests
 ```
