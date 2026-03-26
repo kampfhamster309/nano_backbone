@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_api_key",
     "devices",
+    "firmware",
 ]
 
 MIDDLEWARE = [
@@ -85,3 +86,12 @@ REST_FRAMEWORK = {
 
 # djangorestframework-api-key: use Authorization: Api-Key <key> header (default)
 API_KEY_CUSTOM_HEADER = None
+
+# S3-compatible storage (MinIO in dev, any S3-compatible service in production)
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID", "")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY", "")
+AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME", "firmware")
+AWS_S3_ENDPOINT_URL = os.environ.get("AWS_S3_ENDPOINT_URL", "")
+AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "us-east-1")
+AWS_DEFAULT_ACL = None
+AWS_S3_FILE_OVERWRITE = False
