@@ -1,0 +1,66 @@
+# ── AI / planning files ──────────────────────────────────────────────────────
+CLAUDE.md
+AGENTS.md
+cache.md
+rough_plan.md
+development_plan.md
+
+# ── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.Python
+pip-wheel-metadata/
+
+# ── Virtual environments ──────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── Django ────────────────────────────────────────────────────────────────────
+*.log
+local_settings.py
+db.sqlite3
+media/
+staticfiles/
+
+# ── Environment / secrets ─────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+.docker/
+
+# ── CircuitPython / firmware ──────────────────────────────────────────────────
+firmware/settings.toml
+firmware/.fseventsd/
+firmware/.Trashes/
+firmware/.metadata_never_index
+*.mpy
+
+# ── IDEs / editors ────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── Testing / coverage ────────────────────────────────────────────────────────
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+
+# ── mypy ─────────────────────────────────────────────────────────────────────
+.mypy_cache/
