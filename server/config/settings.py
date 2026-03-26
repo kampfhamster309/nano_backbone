@@ -95,3 +95,7 @@ AWS_S3_ENDPOINT_URL = os.environ.get("AWS_S3_ENDPOINT_URL", "")
 AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "us-east-1")
 AWS_DEFAULT_ACL = None
 AWS_S3_FILE_OVERWRITE = False
+# Public-facing endpoint for presigned URLs. In dev, MinIO's internal Docker hostname
+# (AWS_S3_ENDPOINT_URL) is unreachable by external clients, so this should be set to
+# http://localhost:9000. In production with a real S3, leave unset.
+AWS_S3_PRESIGNED_ENDPOINT_URL = os.environ.get("AWS_S3_PRESIGNED_ENDPOINT_URL", "")

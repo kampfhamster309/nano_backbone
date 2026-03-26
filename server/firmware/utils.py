@@ -5,9 +5,12 @@ from django.conf import settings
 
 
 def generate_presigned_url(object_key: str, expiry_seconds: int = 300) -> str:
+    # Use a separate public endpoint for presigned URLs if configured — the storage
+    # endpoint may be an internal Docker hostname unreachable by external clients.
+    endpoint = getattr(settings, "AWS_S3_PRESIGNED_ENDPOINT_URL", None) or settings.AWS_S3_ENDPOINT_URL
     client = boto3.client(
         "s3",
-        endpoint_url=settings.AWS_S3_ENDPOINT_URL,
+        endpoint_url=endpoint,
         aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
         region_name=getattr(settings, "AWS_S3_REGION_NAME", "us-east-1"),
