@@ -100,7 +100,7 @@ def _setup_esp():
     AttributeError here, run `import board; print(dir(board))` in the REPL
     to see what your build exposes.
     """
-    spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
+    spi = busio.SPI(board.SCK1, board.MOSI1, board.MISO1)
     cs = DigitalInOut(board.CS1)
     ready = DigitalInOut(board.ESP_BUSY)
     reset_pin = DigitalInOut(board.ESP_RESET)
@@ -166,7 +166,7 @@ def run():
     time.sleep(1)
 
     print("[captive] Starting SoftAP:", AP_SSID)
-    esp.create_AP(AP_SSID)
+    esp.create_AP(AP_SSID, b"", channel=1, timeout=10)
 
     try:
         ap_ip = esp.pretty_ip(esp.ip_address)
@@ -175,7 +175,8 @@ def run():
     print(f"[captive] Connect to '{AP_SSID}' and open http://{ap_ip}/")
 
     server_sock = esp.get_socket()
-    esp.server_socket(server_sock, AP_PORT, adafruit_esp32spi.TCP_MODE)
+    #esp.server_socket(server_sock, AP_PORT, adafruit_esp32spi.TCP_MODE)
+    esp.start_server(80, server_sock)
     print("[captive] Listening on port", AP_PORT)
 
     while True:
