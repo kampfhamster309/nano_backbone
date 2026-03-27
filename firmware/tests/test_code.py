@@ -20,6 +20,7 @@ for mod in (
     "adafruit_esp32spi.adafruit_esp32spi",
     "adafruit_esp32spi.adafruit_esp32spi_socketpool",
     "adafruit_requests",
+    "adafruit_zipfile",
 ):
     sys.modules.setdefault(mod, MagicMock())
 
@@ -163,6 +164,89 @@ class TestCheckForUpdate(unittest.TestCase):
         firmware_code._check_for_update(session, "http://srv:8000/", "key", "1.0.0")
         called_url = session.get.call_args[0][0]
         self.assertEqual(called_url, "http://srv:8000/api/v1/firmware/latest/")
+
+
+class TestPostEvent(unittest.TestCase):
+    def _make_session(self, status_code):
+        response = MagicMock()
+        response.status_code = status_code
+        session = MagicMock()
+        session.post.return_value = response
+        return session
+
+    def test_posts_to_correct_url(self):
+        session = self._make_session(201)
+        firmware_code._post_event(session, "http://srv:8000", "mykey", "update_success", "1.0.1")
+        called_url = session.post.call_args[0][0]
+        self.assertEqual(called_url, "http://srv:8000/api/v1/devices/events/")
+
+    def test_sends_correct_payload(self):
+        import json
+        session = self._make_session(201)
+        firmware_code._post_event(session, "http://srv:8000", "key", "update_failed", "1.0.1")
+        kwargs = session.post.call_args[1]
+        payload = json.loads(kwargs["data"])
+        self.assertEqual(payload["event"], "update_failed")
+        self.assertEqual(payload["version"], "1.0.1")
+
+    def test_sends_api_key_header(self):
+        session = self._make_session(201)
+        firmware_code._post_event(session, "http://srv:8000", "mykey", "update_success", "1.0.0")
+        headers = session.post.call_args[1]["headers"]
+        self.assertEqual(headers["Authorization"], "Api-Key mykey")
+
+    def test_does_not_raise_on_network_error(self):
+        session = MagicMock()
+        session.post.side_effect = Exception("Connection refused")
+        # Must not raise
+        firmware_code._post_event(session, "http://srv:8000", "key", "update_success", "1.0.0")
+
+    def test_does_not_raise_on_non_201_status(self):
+        session = self._make_session(500)
+        # Must not raise
+        firmware_code._post_event(session, "http://srv:8000", "key", "update_success", "1.0.0")
+
+
+class TestUpdateCurrentVersion(unittest.TestCase):
+    def _capture_write(self, version, env_overrides=None):
+        env = {
+            "WIFI_SSID": "MyNet",
+            "WIFI_PASSWORD": "secret",
+            "SERVER_URL": "http://srv:8000",
+            "DEVICE_API_KEY": "abc123",
+            **(env_overrides or {}),
+        }
+        written = []
+
+        class _FakeFile:
+            def write(self, s):
+                written.append(s)
+            def __enter__(self):
+                return self
+            def __exit__(self, *a):
+                pass
+
+        with patch("os.getenv", side_effect=lambda k, d="": env.get(k, d)), \
+             patch("builtins.open", lambda p, m: _FakeFile()):
+            firmware_code._update_current_version(version)
+
+        return "".join(written)
+
+    def test_writes_new_version(self):
+        content = self._capture_write("1.0.1")
+        self.assertIn('CURRENT_VERSION = "1.0.1"', content)
+
+    def test_preserves_wifi_ssid(self):
+        content = self._capture_write("1.0.1")
+        self.assertIn('WIFI_SSID = "MyNet"', content)
+
+    def test_preserves_api_key(self):
+        content = self._capture_write("1.0.1")
+        self.assertIn('DEVICE_API_KEY = "abc123"', content)
+
+    def test_escapes_special_chars_in_preserved_values(self):
+        content = self._capture_write("1.0.1", {"WIFI_SSID": 'my"net'})
+        self.assertIn(r'WIFI_SSID = "my\"net"', content)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .models import Device, DeviceAPIKey
+from .models import Device, DeviceAPIKey, UpdateEvent
 
 
 class DeviceRegistrationTests(APITestCase):
@@ -77,3 +77,71 @@ class PingTests(APITestCase):
 
         device.refresh_from_db()
         self.assertIsNotNone(device.last_seen_at)
+
+
+class UpdateEventTests(APITestCase):
+    def setUp(self):
+        response = self.client.post(
+            reverse("device-register"), {"name": "test-device"}, format="json"
+        )
+        self.api_key = response.json()["api_key"]
+        self.auth = {"HTTP_AUTHORIZATION": f"Api-Key {self.api_key}"}
+
+    def test_update_success_returns_201(self):
+        response = self.client.post(
+            reverse("device-event"),
+            {"event": "update_success", "version": "1.0.1"},
+            format="json",
+            **self.auth,
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.json(), {"status": "ok"})
+
+    def test_update_failed_returns_201(self):
+        response = self.client.post(
+            reverse("device-event"),
+            {"event": "update_failed", "version": "1.0.1"},
+            format="json",
+            **self.auth,
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_event_is_persisted_to_db(self):
+        self.client.post(
+            reverse("device-event"),
+            {"event": "update_success", "version": "1.0.1"},
+            format="json",
+            **self.auth,
+        )
+        self.assertEqual(UpdateEvent.objects.count(), 1)
+        ev = UpdateEvent.objects.first()
+        self.assertEqual(ev.event, "update_success")
+        self.assertEqual(ev.version, "1.0.1")
+        self.assertEqual(ev.device.name, "test-device")
+
+    def test_invalid_event_type_returns_400(self):
+        response = self.client.post(
+            reverse("device-event"),
+            {"event": "rebooted", "version": "1.0.0"},
+            format="json",
+            **self.auth,
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_unauthenticated_returns_403(self):
+        response = self.client.post(
+            reverse("device-event"),
+            {"event": "update_success", "version": "1.0.0"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_version_is_optional(self):
+        response = self.client.post(
+            reverse("device-event"),
+            {"event": "update_failed"},
+            format="json",
+            **self.auth,
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(UpdateEvent.objects.first().version, "")
