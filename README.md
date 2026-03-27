@@ -7,6 +7,13 @@ OTA (over-the-air) firmware update system for the Arduino Nano RP2040 Connect.
 - **`server/`** — Django REST Framework update server
 - **`firmware/`** — CircuitPython firmware for the Arduino Nano RP2040 Connect
 
+### Device libraries required in `lib/` on CIRCUITPY
+
+- `adafruit_esp32spi/` (including `adafruit_esp32spi_socketpool.mpy`)
+- `adafruit_bus_device/`
+- `adafruit_requests.mpy`
+- `adafruit_connection_manager.mpy`
+
 ## Local development
 
 ### Prerequisites
@@ -17,7 +24,7 @@ OTA (over-the-air) firmware update system for the Arduino Nano RP2040 Connect.
 
 ```bash
 cp .env.example .env
-docker-compose up
+docker compose up
 ```
 
 This starts:
