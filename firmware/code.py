@@ -20,7 +20,7 @@ import board
 import busio
 from digitalio import DigitalInOut
 from adafruit_esp32spi import adafruit_esp32spi
-import adafruit_esp32spi.adafruit_esp32spi_socket as socket
+import adafruit_esp32spi.adafruit_esp32spi_socketpool as socketpool
 import adafruit_requests as requests
 
 # WIFI_PASSWORD is intentionally absent — open networks use an empty password.
@@ -145,8 +145,8 @@ def main():
         # TODO: main application logic here
         return
 
-    socket.set_interface(esp)
-    session = requests.Session(socket, esp)
+    pool = socketpool.SocketPool(esp)
+    session = requests.Session(pool)
 
     result = _check_for_update(session, server_url, api_key, current_version)
     if result is not None:

@@ -18,7 +18,7 @@ for mod in (
     "digitalio",
     "adafruit_esp32spi",
     "adafruit_esp32spi.adafruit_esp32spi",
-    "adafruit_esp32spi.adafruit_esp32spi_socket",
+    "adafruit_esp32spi.adafruit_esp32spi_socketpool",
     "adafruit_requests",
 ):
     sys.modules.setdefault(mod, MagicMock())
