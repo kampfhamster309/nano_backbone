@@ -4,27 +4,58 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from devices.models import DEVICE_TYPE_NANO_RP2040, DEVICE_TYPE_ESP32_CYD
 from .models import FirmwareRelease
 
 MOCK_PRESIGNED_URL = "https://minio:9000/firmware/releases/1.0.0/fw.zip?X-Amz-Signature=abc"
+NANO = DEVICE_TYPE_NANO_RP2040
+CYD = DEVICE_TYPE_ESP32_CYD
 
 
 class FirmwareReleaseModelTests(APITestCase):
     def test_setting_is_latest_clears_previous_latest(self):
-        FirmwareRelease.objects.create(version="1.0.0", is_latest=True)
-        FirmwareRelease.objects.create(version="1.0.1", is_latest=True)
-        self.assertFalse(FirmwareRelease.objects.get(version="1.0.0").is_latest)
-        self.assertTrue(FirmwareRelease.objects.get(version="1.0.1").is_latest)
+        FirmwareRelease.objects.create(version="1.0.0", device_type=NANO, is_latest=True)
+        FirmwareRelease.objects.create(version="1.0.1", device_type=NANO, is_latest=True)
+        self.assertFalse(FirmwareRelease.objects.get(version="1.0.0", device_type=NANO).is_latest)
+        self.assertTrue(FirmwareRelease.objects.get(version="1.0.1", device_type=NANO).is_latest)
 
-    def test_only_one_latest_at_a_time(self):
+    def test_only_one_latest_at_a_time_per_device_type(self):
         for v in ["1.0.0", "1.0.1", "1.0.2"]:
-            FirmwareRelease.objects.create(version=v, is_latest=True)
-        self.assertEqual(FirmwareRelease.objects.filter(is_latest=True).count(), 1)
+            FirmwareRelease.objects.create(version=v, device_type=NANO, is_latest=True)
+        self.assertEqual(
+            FirmwareRelease.objects.filter(is_latest=True, device_type=NANO).count(), 1
+        )
 
     def test_non_latest_release_does_not_clear_existing_latest(self):
-        FirmwareRelease.objects.create(version="1.0.0", is_latest=True)
-        FirmwareRelease.objects.create(version="1.0.1", is_latest=False)
-        self.assertTrue(FirmwareRelease.objects.get(version="1.0.0").is_latest)
+        FirmwareRelease.objects.create(version="1.0.0", device_type=NANO, is_latest=True)
+        FirmwareRelease.objects.create(version="1.0.1", device_type=NANO, is_latest=False)
+        self.assertTrue(FirmwareRelease.objects.get(version="1.0.0", device_type=NANO).is_latest)
+
+    def test_is_latest_scoped_per_device_type(self):
+        """Setting is_latest for one device type must not affect the other."""
+        FirmwareRelease.objects.create(version="1.0.0", device_type=NANO, is_latest=True)
+        FirmwareRelease.objects.create(version="1.0.0", device_type=CYD, is_latest=True)
+        # Both should still be latest — they are independent tracks
+        self.assertTrue(
+            FirmwareRelease.objects.get(version="1.0.0", device_type=NANO).is_latest
+        )
+        self.assertTrue(
+            FirmwareRelease.objects.get(version="1.0.0", device_type=CYD).is_latest
+        )
+
+    def test_new_latest_for_one_type_does_not_clear_other_type(self):
+        FirmwareRelease.objects.create(version="1.0.0", device_type=NANO, is_latest=True)
+        FirmwareRelease.objects.create(version="1.0.0", device_type=CYD, is_latest=True)
+        # Publish a new Nano release
+        FirmwareRelease.objects.create(version="1.0.1", device_type=NANO, is_latest=True)
+        # CYD latest must be untouched
+        self.assertTrue(
+            FirmwareRelease.objects.get(version="1.0.0", device_type=CYD).is_latest
+        )
+        # Old Nano latest must be cleared
+        self.assertFalse(
+            FirmwareRelease.objects.get(version="1.0.0", device_type=NANO).is_latest
+        )
 
 
 class FirmwareLatestEndpointTests(APITestCase):

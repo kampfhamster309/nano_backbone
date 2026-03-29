@@ -36,6 +36,6 @@ class FirmwareRelease(models.Model):
     def save(self, *args, **kwargs):
         if self.is_latest:
             FirmwareRelease.objects.exclude(pk=self.pk).filter(
-                is_latest=True
+                is_latest=True, device_type=self.device_type
             ).update(is_latest=False)
         super().save(*args, **kwargs)
