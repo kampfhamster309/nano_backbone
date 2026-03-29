@@ -70,7 +70,7 @@ responsible for flashing the binary after download.
 
 *(Start here once all open questions are resolved.)*
 
-### 1. Add `device_type` to `Device` model
+### ~~1. Add `device_type` to `Device` model~~ ✓
 
 ```python
 DEVICE_TYPE_NANO_RP2040 = "arduino_nano_rp2040_connect"
@@ -86,7 +86,7 @@ device_type = models.CharField(
 )
 ```
 
-### 2. Add `device_type` to `FirmwareRelease` model
+### ~~2. Add `device_type` to `FirmwareRelease` model~~ ✓
 
 Same choices, same field. Non-nullable in step 6.
 
