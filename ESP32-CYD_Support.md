@@ -88,8 +88,11 @@ device_type = models.CharField(
 
 ### 2. Add `device_type` to `FirmwareRelease` model
 
-Same choices, same field. Non-nullable (every release belongs to exactly one
-device type).
+Same choices, same field. Non-nullable in step 6.
+
+Also change the `version` uniqueness constraint from `unique=True` on the
+field to `unique_together = [("version", "device_type")]` — the same version
+number must be usable independently per device type.
 
 ### 3. Fix `is_latest` exclusivity to be per device_type
 
