@@ -72,6 +72,7 @@ responsible for flashing the binary after download.
 
 ### ~~1. Add `device_type` to `Device` model~~ ✓
 
+
 ```python
 DEVICE_TYPE_NANO_RP2040 = "arduino_nano_rp2040_connect"
 DEVICE_TYPE_ESP32_CYD   = "esp32_2432s028"
@@ -88,13 +89,14 @@ device_type = models.CharField(
 
 ### ~~2. Add `device_type` to `FirmwareRelease` model~~ ✓
 
+
 Same choices, same field. Non-nullable in step 6.
 
 Also change the `version` uniqueness constraint from `unique=True` on the
 field to `unique_together = [("version", "device_type")]` — the same version
 number must be usable independently per device type.
 
-### 3. Fix `is_latest` exclusivity to be per device_type
+### ~~3. Fix `is_latest` exclusivity to be per device_type~~ ✓
 
 Change the `save()` override in `FirmwareRelease`:
 
