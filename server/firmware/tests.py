@@ -63,14 +63,19 @@ class FirmwareLatestEndpointTests(APITestCase):
         response = self.client.post(
             reverse("device-register"), {"name": "test-device"}, format="json"
         )
-        self.auth = {"HTTP_AUTHORIZATION": f"Api-Key {response.json()['api_key']}"}
+        self.api_key = response.json()["api_key"]
+        self.auth = {"HTTP_AUTHORIZATION": f"Api-Key {self.api_key}"}
+        # Registration serializer doesn't expose device_type yet (step 5).
+        # Set it directly so endpoint tests can exercise device_type logic.
+        from devices.models import Device
+        Device.objects.filter(name="test-device").update(device_type=NANO)
 
     def test_no_latest_release_returns_404(self):
         response = self.client.get(reverse("firmware-latest"), **self.auth)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_release_with_no_file_returns_503(self):
-        FirmwareRelease.objects.create(version="1.0.0", is_latest=True)
+        FirmwareRelease.objects.create(version="1.0.0", device_type=NANO, is_latest=True)
         response = self.client.get(reverse("firmware-latest"), **self.auth)
         self.assertEqual(response.status_code, status.HTTP_503_SERVICE_UNAVAILABLE)
 
@@ -78,6 +83,7 @@ class FirmwareLatestEndpointTests(APITestCase):
     def test_returns_correct_metadata(self, _mock):
         release = FirmwareRelease.objects.create(
             version="1.0.0",
+            device_type=NANO,
             sha256="a" * 64,
             changelog="Initial release",
             is_latest=True,
@@ -95,11 +101,11 @@ class FirmwareLatestEndpointTests(APITestCase):
 
     @patch("firmware.views.generate_presigned_url", return_value=MOCK_PRESIGNED_URL)
     def test_returns_latest_not_most_recent(self, _mock):
-        older = FirmwareRelease.objects.create(version="1.0.0", is_latest=False)
+        older = FirmwareRelease.objects.create(version="1.0.0", device_type=NANO, is_latest=False)
         older.file.name = "releases/1.0.0/fw.zip"
         older.save()
 
-        newer = FirmwareRelease.objects.create(version="1.0.1", is_latest=True)
+        newer = FirmwareRelease.objects.create(version="1.0.1", device_type=NANO, is_latest=True)
         newer.file.name = "releases/1.0.1/fw.zip"
         newer.save()
 
@@ -109,3 +115,28 @@ class FirmwareLatestEndpointTests(APITestCase):
     def test_unauthenticated_returns_403(self):
         response = self.client.get(reverse("firmware-latest"))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_correct_device_type_assertion_is_accepted(self):
+        response = self.client.get(
+            reverse("firmware-latest") + f"?device_type={NANO}", **self.auth
+        )
+        # 404 because no release exists, but not rejected
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_wrong_device_type_assertion_returns_400(self):
+        response = self.client.get(
+            reverse("firmware-latest") + f"?device_type={CYD}", **self.auth
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @patch("firmware.views.generate_presigned_url", return_value=MOCK_PRESIGNED_URL)
+    def test_nano_device_does_not_receive_cyd_firmware(self, _mock):
+        """A Nano device must not receive ESP32-CYD firmware even if no Nano release exists."""
+        cyd_release = FirmwareRelease.objects.create(
+            version="1.0.0", device_type=CYD, is_latest=True
+        )
+        cyd_release.file.name = "releases/1.0.0/fw.bin"
+        cyd_release.save()
+
+        response = self.client.get(reverse("firmware-latest"), **self.auth)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

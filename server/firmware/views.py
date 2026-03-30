@@ -2,14 +2,36 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from devices.models import DeviceAPIKey
+from devices.permissions import HasDeviceAPIKey
 from .models import FirmwareRelease
 from .utils import generate_presigned_url
 
 
 @api_view(["GET"])
 def latest_firmware(request):
+    # Identify the requesting device from its API key.
+    key_str = HasDeviceAPIKey().get_key(request)
     try:
-        release = FirmwareRelease.objects.get(is_latest=True)
+        api_key_obj = DeviceAPIKey.objects.get_from_key(key_str)
+    except DeviceAPIKey.DoesNotExist:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+
+    device = api_key_obj.device
+
+    # Sanity-check: device asserts its own type; reject if it disagrees with
+    # what was stored at registration time.
+    asserted_type = request.query_params.get("device_type", "")
+    if asserted_type and asserted_type != device.device_type:
+        return Response(
+            {"detail": "device_type mismatch."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        release = FirmwareRelease.objects.get(
+            is_latest=True, device_type=device.device_type
+        )
     except FirmwareRelease.DoesNotExist:
         return Response(
             {"detail": "No firmware release available."},

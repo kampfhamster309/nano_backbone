@@ -109,7 +109,7 @@ def save(self, *args, **kwargs):
     super().save(*args, **kwargs)
 ```
 
-### 4. Update `GET /api/v1/firmware/latest/`
+### ~~4. Update `GET /api/v1/firmware/latest/`~~ ✓
 
 Accept a `device_type` query parameter. Validate it against the stored type
 on the Device record (looked up from API key). Return 400 on mismatch.
