@@ -151,7 +151,7 @@ choices list (`"arduino_nano_rp2040_connect"` or `"esp32_2432s028"`).
 - Add test cases for cross-type isolation (Nano device must not receive
   ESP32-CYD firmware and vice versa).
 
-### 9. Update CLAUDE.md and README.md
+### ~~9. Update CLAUDE.md and README.md~~ ✓
 
 - Document the two device types and their identifiers.
 - Note that firmware releases are per-device-type.
