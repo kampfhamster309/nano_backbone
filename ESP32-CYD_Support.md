@@ -133,7 +133,7 @@ release = FirmwareRelease.objects.filter(
 Accept required `device_type` in the request body. Validate against the
 choices list (`"arduino_nano_rp2040_connect"` or `"esp32_2432s028"`).
 
-### 6. Write and apply migrations
+### ~~6. Write and apply migrations~~ ✓
 
 - Migration 1: add nullable `device_type` to both models.
 - Migration 2 (data migration): set all existing rows to `"arduino_nano_rp2040_connect"`.

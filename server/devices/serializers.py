@@ -3,8 +3,6 @@ from .models import Device
 
 
 class DeviceRegistrationSerializer(serializers.ModelSerializer):
-    # Model has null=True during migration; enforce required here so the field
-    # is validated before step 6 makes it non-nullable in the DB.
     device_type = serializers.ChoiceField(choices=Device._meta.get_field("device_type").choices)
 
     class Meta:

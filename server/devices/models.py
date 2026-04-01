@@ -13,12 +13,9 @@ DEVICE_TYPE_CHOICES = [
 class Device(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200, unique=True)
-    # Nullable during migration only — becomes non-nullable in step 6.
     device_type = models.CharField(
         max_length=30,
         choices=DEVICE_TYPE_CHOICES,
-        null=True,
-        blank=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)
     last_seen_at = models.DateTimeField(null=True, blank=True)

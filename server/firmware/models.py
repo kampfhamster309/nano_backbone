@@ -9,12 +9,9 @@ def firmware_upload_path(instance, filename):
 
 class FirmwareRelease(models.Model):
     version = models.CharField(max_length=20)
-    # Nullable during migration only — becomes non-nullable in step 6.
     device_type = models.CharField(
         max_length=30,
         choices=DEVICE_TYPE_CHOICES,
-        null=True,
-        blank=True,
     )
     file = models.FileField(
         storage=FirmwareS3Storage,
