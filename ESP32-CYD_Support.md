@@ -139,7 +139,7 @@ choices list (`"arduino_nano_rp2040_connect"` or `"esp32_2432s028"`).
 - Migration 2 (data migration): set all existing rows to `"arduino_nano_rp2040_connect"`.
 - Migration 3: make the field non-nullable.
 
-### 7. Update admin views
+### ~~7. Update admin views~~ ✓
 
 - `FirmwareReleaseAdmin`: add `device_type` to `list_display`, `list_filter`,
   and `fieldsets`.
