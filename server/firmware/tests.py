@@ -61,14 +61,12 @@ class FirmwareReleaseModelTests(APITestCase):
 class FirmwareLatestEndpointTests(APITestCase):
     def setUp(self):
         response = self.client.post(
-            reverse("device-register"), {"name": "test-device"}, format="json"
+            reverse("device-register"),
+            {"name": "test-device", "device_type": NANO},
+            format="json",
         )
         self.api_key = response.json()["api_key"]
         self.auth = {"HTTP_AUTHORIZATION": f"Api-Key {self.api_key}"}
-        # Registration serializer doesn't expose device_type yet (step 5).
-        # Set it directly so endpoint tests can exercise device_type logic.
-        from devices.models import Device
-        Device.objects.filter(name="test-device").update(device_type=NANO)
 
     def test_no_latest_release_returns_404(self):
         response = self.client.get(reverse("firmware-latest"), **self.auth)

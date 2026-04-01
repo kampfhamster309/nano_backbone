@@ -128,7 +128,7 @@ release = FirmwareRelease.objects.filter(
 ).first()
 ```
 
-### 5. Update `POST /api/v1/devices/register/`
+### ~~5. Update `POST /api/v1/devices/register/`~~ ✓
 
 Accept required `device_type` in the request body. Validate against the
 choices list (`"arduino_nano_rp2040_connect"` or `"esp32_2432s028"`).
