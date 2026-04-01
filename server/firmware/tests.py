@@ -138,3 +138,23 @@ class FirmwareLatestEndpointTests(APITestCase):
 
         response = self.client.get(reverse("firmware-latest"), **self.auth)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    @patch("firmware.views.generate_presigned_url", return_value=MOCK_PRESIGNED_URL)
+    def test_cyd_device_does_not_receive_nano_firmware(self, _mock):
+        """A CYD device must not receive Nano firmware even if no CYD release exists."""
+        # Register a CYD device and obtain its auth header.
+        response = self.client.post(
+            reverse("device-register"),
+            {"name": "cyd-device", "device_type": CYD},
+            format="json",
+        )
+        cyd_auth = {"HTTP_AUTHORIZATION": f"Api-Key {response.json()['api_key']}"}
+
+        nano_release = FirmwareRelease.objects.create(
+            version="1.0.0", device_type=NANO, is_latest=True
+        )
+        nano_release.file.name = "releases/1.0.0/fw.zip"
+        nano_release.save()
+
+        response = self.client.get(reverse("firmware-latest"), **cyd_auth)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

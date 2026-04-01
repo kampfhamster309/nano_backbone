@@ -145,7 +145,7 @@ choices list (`"arduino_nano_rp2040_connect"` or `"esp32_2432s028"`).
   and `fieldsets`.
 - `DeviceAdmin`: add `device_type` to `list_display` and `list_filter`.
 
-### 8. Update all server tests
+### ~~8. Update all server tests~~ ✓
 
 - Pass `device_type` where required in registration calls.
 - Add test cases for cross-type isolation (Nano device must not receive
