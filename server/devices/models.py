@@ -2,10 +2,21 @@ import uuid
 from django.db import models
 from rest_framework_api_key.models import AbstractAPIKey
 
+DEVICE_TYPE_NANO_RP2040 = "arduino_nano_rp2040_connect"
+DEVICE_TYPE_ESP32_CYD = "esp32_2432s028"
+DEVICE_TYPE_CHOICES = [
+    (DEVICE_TYPE_NANO_RP2040, "Arduino Nano RP2040 Connect"),
+    (DEVICE_TYPE_ESP32_CYD, "ESP32-2432S028 (CYD)"),
+]
+
 
 class Device(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200, unique=True)
+    device_type = models.CharField(
+        max_length=30,
+        choices=DEVICE_TYPE_CHOICES,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     last_seen_at = models.DateTimeField(null=True, blank=True)
 
