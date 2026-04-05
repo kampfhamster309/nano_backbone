@@ -1,11 +1,20 @@
 # nano_backbone
 
-OTA (over-the-air) firmware update system for the Arduino Nano RP2040 Connect.
+OTA (over-the-air) firmware update system supporting multiple device types.
+
+## Supported device types
+
+| Identifier | Device |
+|---|---|
+| `arduino_nano_rp2040_connect` | Arduino Nano RP2040 Connect |
+| `esp32_2432s028` | ESP32-2432S028 (CYD) |
+
+Each device type has an independent firmware track on the server. Firmware releases for one type never affect the other.
 
 ## Components
 
-- **`server/`** — Django REST Framework update server
-- **`firmware/`** — CircuitPython firmware for the Arduino Nano RP2040 Connect
+- **`server/`** — Django REST Framework update server (supports all device types)
+- **`firmware/`** — CircuitPython firmware for the Arduino Nano RP2040 Connect (ESP32-CYD firmware lives in a separate project)
 
 ### Device libraries required in `lib/` on CIRCUITPY
 
@@ -39,10 +48,10 @@ This starts:
 ```bash
 curl -X POST http://localhost:8000/api/v1/devices/register/ \
   -H "Content-Type: application/json" \
-  -d '{"name": "my-device"}'
+  -d '{"name": "my-device", "device_type": "arduino_nano_rp2040_connect"}'
 ```
 
-Returns `{ "device": {...}, "api_key": "..." }`. Save the `api_key` — it is shown only once.
+Returns `{ "device": {...}, "api_key": "..." }`. Save the `api_key` — it is shown only once. `device_type` must be one of the supported identifiers listed above.
 
 #### Ping (smoke-test auth)
 

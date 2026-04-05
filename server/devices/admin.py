@@ -5,7 +5,8 @@ from .models import Device, DeviceAPIKey, UpdateEvent
 
 @admin.register(Device)
 class DeviceAdmin(admin.ModelAdmin):
-    list_display = ["name", "id", "created_at", "last_seen_at"]
+    list_display = ["name", "device_type", "id", "created_at", "last_seen_at"]
+    list_filter = ["device_type"]
     readonly_fields = ["id", "created_at", "last_seen_at"]
 
 
