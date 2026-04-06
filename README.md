@@ -14,7 +14,8 @@ Each device type has an independent firmware track on the server. Firmware relea
 ## Components
 
 - **`server/`** — Django REST Framework update server (supports all device types)
-- **`firmware/`** — CircuitPython firmware for the Arduino Nano RP2040 Connect (ESP32-CYD firmware lives in a separate project)
+- **`firmware/`** — CircuitPython firmware scaffold for the Arduino Nano RP2040 Connect (ESP32-CYD firmware lives in a separate project)
+- **`example_firmware/`** — Full working implementation for an environment sensor node: DHT20 temperature/humidity sensor, SSD1306 OLED display, and Home Assistant MQTT Discovery, with OTA updates via this server. See [`example_firmware/README.md`](example_firmware/README.md) for setup and usage.
 
 ### Device libraries required in `lib/` on CIRCUITPY
 
@@ -73,4 +74,5 @@ python manage.py test devices firmware --settings=config.test_settings
 **Firmware** (host-runnable, no hardware required):
 ```bash
 python3 -m unittest discover -s firmware/tests
+python3 -m unittest discover -s example_firmware/tests
 ```
