@@ -25,8 +25,14 @@ _BACKUP_DIR = "/backup"
 _ROLLBACK_DONE = "/rollback_completed"
 _MAX_BOOT_ATTEMPTS = 3
 _CHUNK = 1024
-# Files that ota.py may replace; must match ota._FIRMWARE_FILES.
-_FIRMWARE_FILES = ("code.py", "ota.py", "captive.py", "sensor.py", "display.py", "mqtt_ha.py")
+_MANIFEST = "firmware_manifest.txt"
+# Fallback used only when no manifest exists in the backup (i.e. the device
+# has never received an OTA update that carried a firmware_manifest.txt).
+# Once any manifest-aware update has been applied this list is never consulted.
+_FIRMWARE_FILES_FALLBACK = (
+    "code.py", "ota.py", "captive.py",
+    "sensor.py", "display.py", "mqtt_ha.py",
+)
 
 
 # ── Filesystem helpers ─────────────────────────────────────────────────────────
@@ -68,9 +74,25 @@ def _remove(path):
         pass
 
 
+def _read_manifest():
+    """Return the list of firmware filenames from the backed-up manifest.
+
+    Falls back to _FIRMWARE_FILES_FALLBACK if no manifest was included in the
+    backup (i.e. the device has never received a manifest-aware OTA update).
+    """
+    try:
+        with open(_BACKUP_DIR + "/" + _MANIFEST) as f:
+            files = [line.strip() for line in f.readlines() if line.strip()]
+        if files:
+            return files
+    except OSError:
+        pass
+    return list(_FIRMWARE_FILES_FALLBACK)
+
+
 def _restore_backup():
     """Overwrite current firmware files with the backed-up copies."""
-    for name in _FIRMWARE_FILES:
+    for name in _read_manifest():
         src = _BACKUP_DIR + "/" + name
         dst = "/" + name
         try:

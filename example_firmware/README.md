@@ -1,8 +1,8 @@
 # Environment Sensor Firmware
 
 CircuitPython firmware for the **Arduino Nano RP2040 Connect** that reads
-temperature and humidity from a DHT20 sensor, shows both values on an SSD1306
-OLED display, and publishes them to Home Assistant via MQTT Discovery.
+temperature and humidity from a DHT20 sensor, displays both values on an
+SSD1306 OLED, and publishes readings to Home Assistant via MQTT Discovery.
 
 OTA firmware updates are served by the
 [nano_backbone](../README.md) server.
@@ -127,8 +127,7 @@ payloads. Home Assistant picks them up automatically and creates:
 - **`<Device name> Humidity`** — %, device class `humidity`
 
 Both entities are grouped under a single HA device identified by the board's
-hardware chip ID (`DEVICE_ID`), which is stable across reboots and OTA
-updates.
+hardware chip ID (`DEVICE_ID`), which is stable across reboots and OTA updates.
 
 No manual HA configuration is required beyond having the MQTT integration
 enabled.
@@ -143,6 +142,11 @@ The nano_backbone server expects a zip archive containing the firmware files
 at the **root level** (no subdirectory). `boot.py` is intentionally excluded
 — it is the OTA safety boundary and must not be overwritten by an update.
 
+`build_zip.sh` automatically generates a `firmware_manifest.txt` and includes
+it in the zip. This manifest tells `boot.py` which files to restore during a
+rollback, so `boot.py` never needs to be modified when new files are added to
+the firmware.
+
 ```
 env_sensor_<version>.zip
   code.py
@@ -151,11 +155,25 @@ env_sensor_<version>.zip
   sensor.py
   display.py
   mqtt_ha.py
+  firmware_manifest.txt
+  lib/some_library.mpy    ← only when bundling a new library dependency
 ```
 
-### Building the zip
+### Bundling new library dependencies
 
-Use the included `build_zip.sh` script:
+If a release introduces a library that is not yet installed on target devices,
+stage it in `lib/` before building so it gets included in the zip and deployed
+alongside the firmware files:
+
+```bash
+# Example: first release to require neopixel.mpy
+cp /path/to/circuitpython-bundle/lib/neopixel.mpy example_firmware/lib/
+```
+
+The `lib/` directory is gitignored. Only stage files needed for the current
+release — once a library is on all devices it no longer needs to be bundled.
+
+### Building the zip
 
 ```bash
 cd example_firmware
@@ -165,8 +183,11 @@ cd example_firmware
 Output:
 
 ```
-Created: env_sensor_1.0.0.zip
-SHA256:  <hex digest>
+Created : env_sensor_1.0.0.zip
+SHA256  : <hex digest>
+
+Upload this zip via the Django admin (SHA-256 is computed automatically on save):
+  http://<server>:8000/admin/firmware/firmwarerelease/add/
 ```
 
 ### Uploading to the server

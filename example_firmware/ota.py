@@ -17,8 +17,14 @@ import microcontroller
 
 BACKUP_DIR = "/backup"
 OTA_PENDING_PATH = "/ota_pending"
-# Must match boot._FIRMWARE_FILES.
-_FIRMWARE_FILES = ("code.py", "ota.py", "captive.py", "sensor.py", "display.py", "mqtt_ha.py")
+# Canonical list of files managed by OTA updates. firmware_manifest.txt is
+# included so boot.py can discover this list dynamically at rollback time
+# without needing to be updated itself.
+_FIRMWARE_FILES = (
+    "code.py", "ota.py", "captive.py",
+    "sensor.py", "display.py", "mqtt_ha.py",
+    "firmware_manifest.txt",
+)
 _CHUNK = 1024
 _TMP_ZIP = "/fw_update.zip"
 
