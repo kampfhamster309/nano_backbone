@@ -18,7 +18,7 @@ import microcontroller
 BACKUP_DIR = "/backup"
 OTA_PENDING_PATH = "/ota_pending"
 # Must match boot._FIRMWARE_FILES.
-_FIRMWARE_FILES = ("code.py", "ota.py", "captive.py")
+_FIRMWARE_FILES = ("code.py", "ota.py", "captive.py", "sensor.py", "display.py", "mqtt_ha.py")
 _CHUNK = 1024
 _TMP_ZIP = "/fw_update.zip"
 

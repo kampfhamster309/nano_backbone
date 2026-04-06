@@ -1,0 +1,22 @@
+# WiFi
+WIFI_SSID = "your-wifi-ssid"
+WIFI_PASSWORD = "your-wifi-password"  # leave empty for open networks
+
+# nano_backbone OTA server
+SERVER_URL = "http://192.168.1.100:8000"
+DEVICE_API_KEY = "your-device-api-key"
+CURRENT_VERSION = "0.0.0"  # managed automatically by the firmware; do not edit
+
+# MQTT broker
+MQTT_BROKER = "192.168.1.100"
+MQTT_PORT = 1883
+MQTT_USER = ""        # leave empty for anonymous access
+MQTT_PASSWORD = ""    # leave empty for anonymous access
+
+# Device identity
+DEVICE_NAME = "Living Room Sensor"  # human-readable label shown in Home Assistant
+# Note: DEVICE_ID is derived automatically from the RP2040 chip ID at runtime.
+#       It is not stored in settings.toml.
+
+# Sensor polling
+POLL_INTERVAL = 30  # seconds between readings (minimum 2)
