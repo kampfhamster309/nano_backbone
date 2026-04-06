@@ -43,6 +43,7 @@ staticfiles/
 
 # ── CircuitPython / firmware ──────────────────────────────────────────────────
 firmware/settings.toml
+example_firmware/*.zip
 firmware/.fseventsd/
 firmware/.Trashes/
 firmware/.metadata_never_index
