@@ -50,7 +50,7 @@ the following into the `lib/` folder on the `CIRCUITPY` drive:
 | `adafruit_framebuf.mpy` | Adafruit CircuitPython Bundle |
 | `adafruit_minimqtt/` | Adafruit CircuitPython Bundle |
 | `adafruit_ticks.mpy` | Adafruit CircuitPython Bundle (dependency of `adafruit_minimqtt`) |
-| `zipfile.py` | [jonnor/micropython-zipfile](https://github.com/jonnor/micropython-zipfile) — MicroPython port of CPython's zipfile module; maintainer confirms CircuitPython compatibility. Copy `zipfile.py` from the repo root into `lib/`. |
+| `zipfile.py` | [jonnor/micropython-zipfile](https://github.com/jonnor/micropython-zipfile) — MicroPython port of CPython's zipfile module; works with CircuitPython. Copy `zipfile.py` from the repo root into `lib/`. |
 
 ---
 
