@@ -45,6 +45,8 @@ staticfiles/
 firmware/settings.toml
 example_firmware/*.zip
 example_firmware/lib/
+firmware/*.zip
+firmware/lib/
 firmware/.fseventsd/
 firmware/.Trashes/
 firmware/.metadata_never_index
